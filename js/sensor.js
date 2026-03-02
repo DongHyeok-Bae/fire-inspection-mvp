@@ -1,14 +1,14 @@
 /**
  * sensor.js - DeviceMotion/Orientation 자이로 안정화 감지
  *
- * 상태: RED (>5 deg/s) → YELLOW (2~5 deg/s) → STABLE (<2 deg/s)
- * 안정 상태 1.5초 연속 유지 시 onStable 콜백 호출
+ * 상태: RED (>12 deg/s) → YELLOW (6~12 deg/s) → STABLE (<6 deg/s)
+ * 안정 상태 1초 연속 유지 시 onStable 콜백 호출
  */
 const Sensor = (() => {
-  // 임계값
-  const THRESHOLD_RED = 5;       // deg/s 이상 = 흔들림
-  const THRESHOLD_YELLOW = 2;    // deg/s 이상 = 안정화 중
-  const STABLE_DURATION = 1500;  // ms 연속 안정 유지 필요
+  // 임계값 (완화됨 — 일반적 손떨림 무시, 큰 움직임만 감지)
+  const THRESHOLD_RED = 12;      // deg/s 이상 = 흔들림
+  const THRESHOLD_YELLOW = 6;    // deg/s 이상 = 안정화 중
+  const STABLE_DURATION = 1000;  // ms 연속 안정 유지 필요
   const WINDOW_SIZE = 30;        // 슬라이딩 윈도우 샘플 수 (~500ms @60Hz)
 
   let supported = false;

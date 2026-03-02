@@ -1,5 +1,5 @@
 /**
- * audio.js - 비프음 프로그레시브, TTS 카운트다운, 셔터음
+ * audio.js - 비프음 프로그레시브, TTS 카운트다운, 셔터음, 음성 안내
  */
 const Audio_ = (() => {
   let audioCtx = null;
@@ -97,20 +97,37 @@ const Audio_ = (() => {
     source.start();
   }
 
+  // ===== 음성 안내 (카메라 시작 시) =====
+
+  /**
+   * 항목별 음성 안내 재생 (1.5배속)
+   * @param {string} text - 안내 문구
+   */
+  function speakGuide(text) {
+    if (!ttsSupported || !window.speechSynthesis) return;
+    // 이전 음성 중단
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'ko-KR';
+    utter.rate = 1.5;
+    utter.volume = 1.0;
+    if (ttsVoice) utter.voice = ttsVoice;
+    window.speechSynthesis.speak(utter);
+  }
+
   // ===== TTS 카운트다운 =====
 
   /**
-   * TTS 카운트다운 실행: "완벽합니다" → "3" → "2" → "1"
+   * TTS 카운트다운 실행: "3" → "2" → "1" (3초)
    * @param {Function} onTick - (number) => void, 각 숫자 표시 시 호출
    * @param {Function} onComplete - 카운트다운 완료 시 호출
    * @param {Function} onInterrupt - 중단 확인 함수 (true 반환 시 중단)
    */
   function countdown(onTick, onComplete, onInterrupt) {
     const steps = [
-      { text: '완벽합니다', delay: 1200, display: null },
-      { text: '3', delay: 900, display: 3 },
-      { text: '2', delay: 900, display: 2 },
-      { text: '1', delay: 900, display: 1 }
+      { text: '3', delay: 1000, display: 3 },
+      { text: '2', delay: 1000, display: 2 },
+      { text: '1', delay: 1000, display: 1 }
     ];
 
     let index = 0;
@@ -123,9 +140,7 @@ const Audio_ = (() => {
       }
 
       const step = steps[index];
-      if (step.display !== null && onTick) {
-        onTick(step.display);
-      }
+      if (onTick) onTick(step.display);
 
       _speak(step.text, step.display);
       index++;
@@ -142,7 +157,7 @@ const Audio_ = (() => {
     if (ttsSupported && window.speechSynthesis) {
       const utter = new SpeechSynthesisUtterance(text);
       utter.lang = 'ko-KR';
-      utter.rate = 1.1;
+      utter.rate = 1.5;
       utter.volume = 1.0;
       if (ttsVoice) utter.voice = ttsVoice;
       window.speechSynthesis.speak(utter);
@@ -162,7 +177,7 @@ const Audio_ = (() => {
     function findKorean() {
       const voices = window.speechSynthesis.getVoices();
       ttsVoice = voices.find(v => v.lang.startsWith('ko')) || null;
-      ttsSupported = voices.length > 0; // 한국어 없어도 TTS 자체는 시도
+      ttsSupported = voices.length > 0;
     }
 
     findKorean();
@@ -173,5 +188,5 @@ const Audio_ = (() => {
     }
   }
 
-  return { init, startBeep, stopBeep, playShutter, countdown };
+  return { init, startBeep, stopBeep, playShutter, speakGuide, countdown };
 })();

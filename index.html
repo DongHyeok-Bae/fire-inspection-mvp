@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>소화기 안전점검</title>
+  <title>자율안전점검</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -13,27 +13,61 @@
   <!-- ===== 1. INIT 화면 ===== -->
   <div id="screen-init" class="screen active">
     <div class="init-content">
-      <div class="init-icon">🧯</div>
-      <h1>소화기 사진 촬영</h1>
-      <p class="init-desc">소화기를 촬영하면<br>안전 상태를 자동으로 점검합니다</p>
+      <div class="init-icon">🔍</div>
+      <h1>자율안전점검</h1>
+      <p class="init-desc">점검 대상을 촬영하면<br>안전 상태를 자동으로 점검합니다</p>
       <button id="btn-start" class="btn-primary">시작하기</button>
     </div>
   </div>
 
-  <!-- ===== 2. CAMERA 화면 ===== -->
+  <!-- ===== 2. SELECT 화면 (항목 선택) ===== -->
+  <div id="screen-select" class="screen">
+    <h1 class="select-title">점검할 대상을 골라주세요</h1>
+    <div class="item-grid">
+      <button class="item-card" data-item="extinguisher">
+        <div class="item-icon">🧯</div>
+        <div class="item-label">소화기</div>
+      </button>
+      <button class="item-card" data-item="gastank">
+        <div class="item-icon">🔵</div>
+        <div class="item-label">가스통</div>
+      </button>
+      <button class="item-card" data-item="gashose">
+        <div class="item-icon">〰️</div>
+        <div class="item-label">가스호스</div>
+      </button>
+      <button class="item-card" data-item="pipe">
+        <div class="item-icon">🔧</div>
+        <div class="item-label">배관/전기</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== 3. CAMERA 화면 ===== -->
   <div id="screen-camera" class="screen">
     <video id="camera-video" autoplay playsinline muted></video>
 
-    <!-- 오버레이 가이드 -->
+    <!-- SVG 마스크 오버레이 (항목별 동적 교체) -->
     <div id="guide-overlay" class="guide-overlay">
-      <div id="guide-box" class="guide-box">
-        <img src="assets/extinguisher-guide.svg" class="guide-silhouette" alt="">
-      </div>
+      <svg id="overlay-svg" class="overlay-svg" viewBox="0 0 400 700" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <mask id="overlay-mask">
+            <!-- 전체 흰색 (보이는 영역) -->
+            <rect width="400" height="700" fill="white"/>
+            <!-- 항목 형태 검정 (투명 컷아웃) — JS에서 동적으로 교체 -->
+            <g id="mask-shape"></g>
+          </mask>
+        </defs>
+        <!-- 반투명 어둡게 처리된 배경 (마스크 적용) -->
+        <rect width="400" height="700" fill="rgba(0,0,0,0.5)" mask="url(#overlay-mask)"/>
+        <!-- 점선 테두리 (항목 형태) — JS에서 동적으로 교체 -->
+        <g id="guide-outline"></g>
+      </svg>
     </div>
 
     <!-- 상단 안내 텍스트 -->
     <div id="guide-text" class="guide-text">
-      소화기를 이 선 안에 꽉 차게 맞춰주세요
+      점검 대상을 맞춰주세요
     </div>
 
     <!-- 상태 표시 바 -->
@@ -61,7 +95,7 @@
     <div id="capture-flash" class="capture-flash"></div>
   </div>
 
-  <!-- ===== 3. REVIEW 화면 ===== -->
+  <!-- ===== 4. REVIEW 화면 ===== -->
   <div id="screen-review" class="screen">
     <div class="review-image-wrap">
       <img id="review-image" src="" alt="촬영된 사진">
@@ -83,17 +117,17 @@
     </div>
   </div>
 
-  <!-- ===== 4. SUBMITTED 화면 ===== -->
+  <!-- ===== 5. SUBMITTED 화면 ===== -->
   <div id="screen-submitted" class="screen">
     <div class="submitted-content">
       <div class="submitted-icon">✅</div>
       <h1>제출 완료!</h1>
       <p class="submitted-desc">사진이 성공적으로 제출되었습니다</p>
-      <button id="btn-new" class="btn-primary btn-secondary">새 사진 촬영</button>
+      <button id="btn-new" class="btn-primary btn-secondary">다른 항목 촬영</button>
     </div>
   </div>
 
-  <!-- ===== 5. ERROR 화면 ===== -->
+  <!-- ===== 6. ERROR 화면 ===== -->
   <div id="screen-error" class="screen">
     <div class="error-content">
       <div class="error-icon">⚠️</div>
